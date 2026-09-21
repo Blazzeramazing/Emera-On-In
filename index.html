@@ -245,7 +245,11 @@
             <!-- PLAYER BACKGROUND VIEW -->
             <div id="player-bg" class="view-hidden flex-1 w-full bg-spBase md:rounded-lg relative flex flex-col items-center justify-center flex-shrink-0 overflow-hidden">
                 <div class="h-16 flex justify-between items-center px-4 bg-gradient-to-b from-black/60 to-transparent absolute top-0 w-full z-20 pointer-events-none">
-                    <div class="flex items-center gap-2 pointer-events-auto md:hidden"></div>
+                    <div class="flex items-center gap-2 pointer-events-auto md:hidden">
+                        <button id="mobile-queue-btn" class="text-white p-2 drop-shadow-md transition hover:scale-105" title="Abrir Fila">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+                    </div>
                     <div class="flex gap-2 pointer-events-auto ml-auto">
                         <button id="install-app-btn" class="hidden text-xs bg-white text-black font-bold py-1 px-3 rounded-full hover:scale-105 transition shadow-lg">Instalar</button>
                         <button id="open-game-btn" class="bg-black/40 hover:bg-black text-white p-2 rounded-full transition backdrop-blur-md shadow-lg" title="Jogar Piano Tiles"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg></button>
@@ -724,7 +728,14 @@
         
         DOM.navHomeBtn.addEventListener('click', () => { switchMainView('home'); if(window.innerWidth < 768) closeSidebar(); });
         DOM.navPlayerBtn.addEventListener('click', () => { switchMainView('player'); if(window.innerWidth < 768) closeSidebar(); });
-        DOM.miniPlayerInfo.addEventListener('click', () => { switchMainView('player'); toggleDrawer(); });
+        
+        // Ação do mini player unificada para evitar duplicação de cliques
+        if(DOM.miniPlayerInfo) {
+            DOM.miniPlayerInfo.addEventListener('click', () => {
+                switchMainView('player');
+                toggleDrawer();
+            });
+        }
 
         const hour = new Date().getHours();
         document.getElementById('greeting-text').textContent = hour < 12 ? 'Bom dia' : (hour < 19 ? 'Boa tarde' : 'Boa noite');
@@ -1456,7 +1467,12 @@
             }
         }
         DOM.drawerHandle.addEventListener('click', toggleDrawer);
-        if(DOM.miniPlayerInfo) DOM.miniPlayerInfo.addEventListener('click', toggleDrawer);
+        
+        // Adicionamos evento ao novo botão de Fila exclusivo para mobile
+        const mobileQueueBtn = document.getElementById('mobile-queue-btn');
+        if (mobileQueueBtn) {
+            mobileQueueBtn.addEventListener('click', () => toggleDrawer());
+        }
 
         const ITEM_HEIGHT = 56; 
         let visualPlaylist = [];
