@@ -247,9 +247,7 @@
             <div id="player-bg" class="view-hidden flex-1 w-full bg-spBase md:rounded-lg relative flex flex-col items-center justify-center flex-shrink-0 overflow-hidden">
                 <div class="h-16 flex justify-between items-center px-4 bg-gradient-to-b from-black/60 to-transparent absolute top-0 w-full z-20 pointer-events-none">
                     <div class="flex items-center gap-2 pointer-events-auto md:hidden">
-                        <button id="mobile-queue-btn" class="text-white p-2 drop-shadow-md transition hover:scale-105" title="Abrir Fila">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
+                        <!-- Botão superior de Fila removido para um visual mais limpo no telemóvel -->
                     </div>
                     <div class="flex gap-2 pointer-events-auto ml-auto">
                         <button id="install-app-btn" class="hidden text-xs bg-white text-black font-bold py-1 px-3 rounded-full hover:scale-105 transition shadow-lg">Instalar</button>
@@ -749,11 +747,12 @@
         DOM.navHomeBtn.addEventListener('click', () => { switchMainView('home'); if(window.innerWidth < 768) closeSidebar(); });
         DOM.navPlayerBtn.addEventListener('click', () => { switchMainView('player'); if(window.innerWidth < 768) closeSidebar(); });
 
-        // A mini-capa no telemóvel serve apenas para ir para o visualizador (player), não abre a gaveta (para evitar conflito).
+        // A mini-capa no telemóvel muda para o visualizador E abre a lista de músicas (Fila)
         if(DOM.miniPlayerInfo) {
             DOM.miniPlayerInfo.addEventListener('click', (e) => {
                 e.stopPropagation();
                 switchMainView('player');
+                toggleDrawer(e);
             });
         }
 
@@ -1536,9 +1535,6 @@
             }
         }
         DOM.drawerHandle.addEventListener('click', toggleDrawer);
-        
-        const mobileQueueBtn = document.getElementById('mobile-queue-btn');
-        if(mobileQueueBtn) mobileQueueBtn.addEventListener('click', toggleDrawer);
 
         const ITEM_HEIGHT = 56; 
         let visualPlaylist = [];
