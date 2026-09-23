@@ -1886,8 +1886,9 @@
                 if(!res.ok) throw new Error("Letra não encontrada na internet.");
                 
                 const data = await res.json();
-                if(data && (data.syncedLyrics || data.plainLyrics)) {
-                    return data.syncedLyrics || data.plainLyrics;
+                if(data && (data.plainLyrics || data.syncedLyrics)) {
+                    // Dá prioridade à letra limpa. Se não houver, usa a sincronizada.
+                    return data.plainLyrics || data.syncedLyrics;
                 }
                 throw new Error("Formato de letra vazio.");
             } catch(e) {
@@ -1904,8 +1905,11 @@
             
             tModal(document.getElementById('lyrics-modal'), true, 'lyrics'); 
             
+            // Função auxiliar que procura e apaga qualquer texto do tipo [00:16.34]
+            const cleanTimeTags = (text) => text ? text.replace(/\[\d{2}:\d{2}(?:\.\d{1,3})?\]\s*/g, '') : "";
+            
             if(t.lyrics && t.lyrics.trim().length > 0) {
-                lyricsTextEl.textContent = t.lyrics;
+                lyricsTextEl.textContent = cleanTimeTags(t.lyrics);
             } else if(t.artist !== "Desconhecido" && t.title) {
                 lyricsTextEl.textContent = "";
                 loadingEl.classList.remove('hidden');
@@ -1915,8 +1919,9 @@
                 loadingEl.classList.add('hidden');
                 
                 if(onlineLyrics) {
-                    lyricsTextEl.textContent = onlineLyrics;
-                    t.lyrics = onlineLyrics; // Guarda na memória do site para não gastar internet da próxima vez
+                    const cleanLyrics = cleanTimeTags(onlineLyrics);
+                    lyricsTextEl.textContent = cleanLyrics;
+                    t.lyrics = cleanLyrics; // Guarda a letra 100% limpa na base de dados
                     if(t.isLocal) saveTrackToDB(t);
                 } else {
                     lyricsTextEl.textContent = "Não foi possível encontrar a letra online para esta música. Tente atualizar a tag de Artista e Título em Editar Info.";
