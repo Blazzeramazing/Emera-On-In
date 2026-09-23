@@ -790,6 +790,33 @@
 
         let exitClicks = 0; let exitTimer = null;
         function forceCloseModal(m) { if (!m) return; if (!m.classList.contains('hidden')) { m.classList.add('opacity-0'); const panel = m.querySelector('[id$="-panel"]'); if(panel && panel.classList.contains('translate-y-0')) { panel.classList.remove('translate-y-0'); panel.classList.add('translate-y-full'); } if(panel && panel.classList.contains('scale-100')) { panel.classList.remove('scale-100'); panel.classList.add('scale-95'); } setTimeout(()=>{ m.classList.add('hidden'); m.classList.remove('flex'); }, 300); if (m === DOM.eqModal) eqModalVisible = false; } }
+        
+        function tModal(m, show, hash) {
+            if (!m) return;
+            const panel = m.querySelector('[id$="-panel"]');
+            if (show) {
+                m.classList.remove('hidden'); m.classList.add('flex');
+                setTimeout(() => {
+                    m.classList.remove('opacity-0');
+                    if (panel) {
+                        if (panel.classList.contains('translate-y-full')) { panel.classList.remove('translate-y-full'); panel.classList.add('translate-y-0'); }
+                        if (panel.classList.contains('scale-95')) { panel.classList.remove('scale-95'); panel.classList.add('scale-100'); }
+                    }
+                }, 10);
+                if (hash && location.hash !== '#' + hash) history.pushState(null, '', '#' + hash);
+                if (m === DOM.eqModal) eqModalVisible = true;
+            } else {
+                m.classList.add('opacity-0');
+                if (panel) {
+                    if (panel.classList.contains('translate-y-0')) { panel.classList.remove('translate-y-0'); panel.classList.add('translate-y-full'); }
+                    if (panel.classList.contains('scale-100')) { panel.classList.remove('scale-100'); panel.classList.add('scale-95'); }
+                }
+                setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+                if (hash && location.hash === '#' + hash) history.back();
+                if (m === DOM.eqModal) eqModalVisible = false;
+            }
+        }
+
         function closeAllOverlays() {
             if (typeof closeGameUI === 'function' && isGameActive) closeGameUI();
             if (typeof isDrawerExpanded !== 'undefined' && isDrawerExpanded) { isDrawerExpanded = false; DOM.rightPanel.classList.remove('expanded'); }
