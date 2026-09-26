@@ -255,6 +255,14 @@
             opacity: 1; transform: scale(1.1) translateY(0); 
             color: var(--accent); text-shadow: 0 0 15px var(--accent-light); font-weight: 900; 
         }
+
+        /* DJ Pulsing Animation */
+        @keyframes djPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(29, 185, 84, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(29, 185, 84, 0); }
+        }
+        .dj-active-btn { animation: djPulse 2s infinite; color: var(--accent) !important; }
     </style>
 </head>
 <body class="text-spTextMain font-sans selection:bg-accent selection:text-white h-[100dvh] flex flex-col overflow-hidden">
@@ -477,6 +485,12 @@
                     <svg id="icon-shuffle" class="w-4 h-4 md:w-5 md:h-5 hidden text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4-4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                     <svg id="icon-radio" class="w-4 h-4 md:w-5 md:h-5 hidden text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 </button>
+                
+                <!-- BOTÃO DJ PESSOAL INJETADO -->
+                <button id="dj-mode-btn" class="text-spTextSub hover:text-white transition flex w-8 h-8 items-center justify-center relative group" title="Ativar DJ Pessoal">
+                    <div class="font-black text-[9px] md:text-[10px] border border-current rounded px-1 group-hover:scale-105 transition-transform">DJ</div>
+                    <span id="dj-loading-indicator" class="absolute top-0 right-0 w-2 h-2 bg-accent rounded-full animate-ping hidden"></span>
+                </button>
 
                 <button id="prev-btn" class="text-spTextSub hover:text-white transition w-8 h-8 flex items-center justify-center"><svg class="w-5 h-5 md:w-6 md:h-6 fill-current" viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 19h2V5H5v14z"></path></svg></button>
 
@@ -515,7 +529,6 @@
                 <input type="range" id="volume-bar" min="0" max="1" step="0.01" value="1" class="standard-slider z-10 relative">
             </div>
 
-            <!-- Botão Exclusivo Desktop para Lista de Fila -->
             <button id="toggle-queue-btn" class="text-accent hover:text-white transition ml-2 p-1" title="Fila de Reprodução">
                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
@@ -637,6 +650,7 @@
         </div>
     </div>
 
+    <!-- Modal de Letras (Karaoke Support) -->
     <div id="lyrics-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] hidden opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-[#121212] border border-[#282828] text-white w-full max-w-lg h-[70vh] rounded-xl p-6 flex flex-col shadow-2xl relative overflow-hidden" id="lyrics-modal-panel">
             <button id="close-lyrics-btn" class="absolute top-4 right-4 text-spTextSub hover:text-white transition bg-black/20 hover:bg-black/40 rounded-full p-2 z-10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -652,6 +666,7 @@
         </div>
     </div>
 
+    <!-- Modal Informações (Capa Expandida) -->
     <div id="full-info-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[150] hidden opacity-0 transition-opacity duration-300 p-4 backdrop-blur-sm">
         <div class="bg-spElevated p-6 md:p-8 rounded-2xl border border-white/10 w-full max-w-lg shadow-2xl flex flex-col items-center text-center relative overflow-hidden transform scale-95 transition-transform duration-300" id="full-info-panel">
             <button id="close-full-info-btn" class="absolute top-4 right-4 text-spTextSub hover:text-white transition bg-black/40 hover:bg-black/80 rounded-full p-2 z-10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -661,6 +676,7 @@
         </div>
     </div>
 
+    <!-- Modal Nativo de Ordenação -->
     <div id="sort-modal" class="fixed inset-0 bg-black/70 flex items-end md:items-center justify-center z-[100] hidden opacity-0 transition-opacity duration-300">
         <div class="bg-spElevated md:border border-spHighlight w-full md:w-[90%] md:max-w-xs md:rounded-lg rounded-t-2xl shadow-2xl overflow-hidden translate-y-full md:translate-y-0 transition-transform duration-300" id="sort-modal-panel">
             <div class="p-4 border-b border-white/5 flex justify-between items-center md:hidden">
@@ -675,6 +691,7 @@
         </div>
     </div>
 
+    <!-- Playlists Extras -->
     <div id="new-playlist-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] hidden opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-spElevated p-6 rounded-lg border border-spHighlight w-full max-w-sm shadow-2xl" id="new-playlist-modal-panel">
             <h3 class="text-xl font-bold text-white mb-4">Nova Playlist</h3>
@@ -727,15 +744,14 @@
         let isFading = false;
         
         let userQueue = [];
-        let precalculatedNextIndex = null; // NOVÍSSIMO: Evita gargalos ao calcular a próxima música!
-        let playedSessionIds = new Set(); // Guarda o histórico da sessão para não repetir músicas
-        let radioSeedTrackId = null; // Semente âncora para a Rádio Inteligente
+        let precalculatedNextIndex = null; 
+        let playedSessionIds = new Set(); 
+        let radioSeedTrackId = null; 
 
         let playMode = parseInt(localStorage.getItem('webPlayerMode')) || 0; 
         let isRepeat = playMode === 1; let isShuffle = playMode === 2; let isRadio = playMode === 3;
         const savedEq = JSON.parse(localStorage.getItem('webPlayerEq')) || [0,0,0,0,0];
         let savedPreamp = parseFloat(localStorage.getItem('webPlayerPreamp')); if (isNaN(savedPreamp)) savedPreamp = 1.0;
-        let secondChances = parseInt(localStorage.getItem('emeraSecondChances')) || 0;
 
         let audioCtx, sourceNode, preampNode, analyser, compressor, eqFilters = [], eqFrequencies = [60, 230, 910, 3600, 14000];
         let visualizerMode = 0; let sleepTimerId = null; let eqModalVisible = false;
@@ -780,6 +796,164 @@
         const toggleQueueBtn = document.getElementById('toggle-queue-btn');
 
         let currentMainView = localStorage.getItem('webPlayerMainView') || 'home';
+
+        const DjEngine = {
+            isActive: false,
+            apiKey: "", // O ambiente Injetará a chave aqui automaticamente.
+            nextTransitionAudioUrl: null,
+            isGenerating: false,
+
+            toggle() {
+                this.isActive = !this.isActive;
+                const btn = document.getElementById('dj-mode-btn');
+                if(this.isActive) {
+                    btn.classList.add('dj-active-btn');
+                    btn.classList.remove('text-spTextSub');
+                    showToast("DJ Emera ativada! Ela preparará uma transição.");
+                    this.prepareNextTransition(); 
+                } else {
+                    btn.classList.remove('dj-active-btn');
+                    btn.classList.add('text-spTextSub');
+                    showToast("DJ Emera desativada.");
+                    this.nextTransitionAudioUrl = null;
+                }
+            },
+
+            async prepareNextTransition() {
+                if (!this.isActive || this.isGenerating || playlist.length < 2) return;
+                
+                this.isGenerating = true;
+                const indicator = document.getElementById('dj-loading-indicator');
+                if(indicator) indicator.classList.remove('hidden');
+
+                try {
+                    const currentTrack = playlist[currentTrackIndex];
+                    let nextIdx = precalculatedNextIndex;
+                    if(nextIdx === null) nextIdx = calculateNextTrackIndex();
+                    
+                    const nextTrack = playlist[nextIdx];
+
+                    if (!currentTrack || !nextTrack) throw new Error("Faltam músicas para transição.");
+
+                    // 1. O Cérebro: Escrever o Roteiro
+                    const prompt = `Você é a 'Emera', uma DJ de rádio virtual muito carismática, moderna e amigável.
+                    O ouvinte acabou de ouvir a música "${currentTrack.title}" do artista ${currentTrack.artist}.
+                    A próxima música a tocar agora será "${nextTrack.title}" do artista ${nextTrack.artist}.
+                    Crie uma transição super curta (MÁXIMO 2 frases). Seja muito natural, como numa rádio FM jovem. 
+                    Não use emojis, nem pontuação estranha. Apenas texto puro para ser lido em voz alta.`;
+
+                    const textPayload = { contents: [{ parts: [{ text: prompt }] }] };
+                    const textRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${this.apiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(textPayload)
+                    });
+                    
+                    const textData = await textRes.json();
+                    const djScript = textData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (!djScript) throw new Error("Falha ao gerar roteiro.");
+
+                    // 2. A Voz: Sintetizar o Áudio (TTS)
+                    const ttsPayload = {
+                        contents: [{ parts: [{ text: `Fale de forma animada, sorridente e carismática: ${djScript}` }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } } // Aoede é descontraída
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
+                    };
+
+                    const ttsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${this.apiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ttsPayload)
+                    });
+                    
+                    const ttsData = await ttsRes.json();
+                    const part = ttsData?.candidates?.[0]?.content?.parts?.[0];
+                    
+                    if (part && part.inlineData && part.inlineData.data) {
+                        const sampleRate = parseInt(part.inlineData.mimeType.match(/rate=(\d+)/)[1], 10) || 24000;
+                        const pcmData = this.base64ToArrayBuffer(part.inlineData.data);
+                        const pcm16 = new Int16Array(pcmData);
+                        const wavBlob = this.pcmToWav(pcm16, sampleRate);
+                        
+                        // Liberta o URL anterior se existir para poupar memória
+                        if (this.nextTransitionAudioUrl) URL.revokeObjectURL(this.nextTransitionAudioUrl);
+                        this.nextTransitionAudioUrl = URL.createObjectURL(wavBlob);
+                    }
+                } catch (err) {
+                    console.warn("DJ Emera em repouso: ", err);
+                } finally {
+                    this.isGenerating = false;
+                    if(indicator) indicator.classList.add('hidden');
+                }
+            },
+
+            playTransition(callback) {
+                if (!this.isActive || !this.nextTransitionAudioUrl) {
+                    callback(); 
+                    return;
+                }
+
+                // Efeito de Rádio: Baixar volume principal da música que acabou (ou que vai começar)
+                if (preampNode) {
+                    const now = audioCtx.currentTime;
+                    preampNode.gain.cancelScheduledValues(now);
+                    preampNode.gain.linearRampToValueAtTime(savedPreamp * 0.15, now + 0.5);
+                }
+
+                const djAudio = new Audio(this.nextTransitionAudioUrl);
+                
+                // Dá o play na locutora
+                djAudio.play().catch(e => console.warn(e));
+
+                // Carrega a música de fundo IMEDIATAMENTE (ficará com volume baixo)
+                callback();
+
+                // Quando a locutora terminar de falar...
+                djAudio.onended = () => {
+                    // Restaura o volume da música no talo!
+                    if (preampNode) {
+                        const now = audioCtx.currentTime;
+                        preampNode.gain.cancelScheduledValues(now);
+                        preampNode.gain.linearRampToValueAtTime(savedPreamp, now + 1.5);
+                    }
+                    this.nextTransitionAudioUrl = null; 
+                    this.prepareNextTransition(); // Ouve e prepara a transição da música que acabou de entrar
+                };
+            },
+
+            base64ToArrayBuffer(base64) {
+                const binary_string = window.atob(base64);
+                const len = binary_string.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) { bytes[i] = binary_string.charCodeAt(i); }
+                return bytes.buffer;
+            },
+
+            pcmToWav(pcmData, sampleRate) {
+                const numChannels = 1; const bitsPerSample = 16;
+                const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+                const blockAlign = numChannels * (bitsPerSample / 8);
+                const dataSize = pcmData.byteLength * 2;
+                const buffer = new ArrayBuffer(44 + dataSize);
+                const view = new DataView(buffer);
+
+                const writeString = (view, offset, string) => { for (let i=0; i<string.length; i++) view.setUint8(offset + i, string.charCodeAt(i)); };
+
+                writeString(view, 0, 'RIFF'); view.setUint32(4, 36 + dataSize, true); writeString(view, 8, 'WAVE');
+                writeString(view, 12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+                view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true);
+                view.setUint32(28, byteRate, true); view.setUint16(32, blockAlign, true); view.setUint16(34, bitsPerSample, true);
+                writeString(view, 36, 'data'); view.setUint32(40, dataSize, true);
+
+                const wavView = new Int16Array(buffer, 44);
+                for (let i = 0; i < pcmData.length; i++) wavView[i] = pcmData[i];
+
+                return new Blob([buffer], { type: 'audio/wav' });
+            }
+        };
+
+        // Escutador de clique no botão do DJ
+        document.getElementById('dj-mode-btn')?.addEventListener('click', () => DjEngine.toggle());
 
         function switchMainView(viewId) {
             currentMainView = viewId;
@@ -937,7 +1111,7 @@
                     const t={...track}; 
                     delete t.src; 
                     delete t.fileRef;
-                    if (t.coverBlob) delete t.cover; // Remove strings Base64 do banco para poupar espaço
+                    if (t.coverBlob) delete t.cover; 
                     db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(t); 
                 }); 
             } 
@@ -959,7 +1133,6 @@
                         t.addedAt = t.addedAt||Date.now(); 
                         if(t.needsMetadata === undefined) t.needsMetadata = false; 
                         
-                        // Reconstrói URL ultra-leve nativa via Blob em vez de armazenar o Base64 na RAM
                         if (t.coverBlob) {
                             t.cover = URL.createObjectURL(t.coverBlob);
                         }
@@ -1326,7 +1499,7 @@
         }
         if ('mediaSession' in navigator) { 
             navigator.mediaSession.setActionHandler('play', () => togglePlay()); navigator.mediaSession.setActionHandler('pause', () => togglePlay()); 
-            navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack()); navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack()); 
+            navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack()); navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack(false)); 
         }
 
         function updateMainFavoriteIcon() {
@@ -1340,15 +1513,14 @@
             if(index < 0) index = playlist.length-1; if(index >= playlist.length) index = 0;
             currentTrackIndex = index; const t = playlist[currentTrackIndex];
             
-            playedSessionIds.add(t.id); // Memoriza que esta música já tocou
+            playedSessionIds.add(t.id);
 
             if(t.isLocal && !t.src && (t.file instanceof File || t.file instanceof Blob)) t.src = URL.createObjectURL(t.file);
             if(t.isLocal) audio.removeAttribute('crossorigin'); else audio.setAttribute('crossorigin', 'anonymous'); 
             
-            // Verifica se tem src válido antes de carregar
             if(!t.src) {
                  showToast("Ficheiro inválido ou não suportado.");
-                 nextTrack(); // Pula se estiver quebrado
+                 nextTrack(false); 
                  return;
             }
 
@@ -1369,7 +1541,6 @@
             if (isFading) return;
             const fadeTime = isAuto ? 1000 : 400;
             
-            // OTIMIZAÇÃO: Se a página não estiver visível, pula a animação demorada que trava as músicas!
             if (audioCtx && isPlaying && preampNode && isPageVisible && !document.hidden) {
                 isFading = true;
                 const now = audioCtx.currentTime;
@@ -1386,7 +1557,6 @@
                     isFading = false;
                 }, fadeTime);
             } else {
-                // Carregamento instantâneo se a app estiver em segundo plano ou suspensa
                 loadTrack(index);
             }
         }
@@ -1398,7 +1568,6 @@
             if(isPlaying) { audio.pause(); } else { const p = audio.play(); if(p!==undefined) p.catch((err)=>{ console.warn(err); showToast("Formato não suportado."); }); }
         }
 
-        // OTIMIZAÇÃO CRÍTICA: Calcula qual música deve tocar DEPOIS, antes mesmo da atual acabar.
         function calculateNextTrackIndex() {
             if (playlist.length === 0) return 0;
             if (userQueue.length > 0) {
@@ -1418,10 +1587,8 @@
                 const currentTrack = playlist[currentTrackIndex];
                 if (!currentTrack) return 0;
                 
-                // Exclui a música atual E as músicas que já tocaram nesta sessão
                 let candidates = playlist.filter(t => t.id !== currentTrack.id && !playedSessionIds.has(t.id));
                 
-                // Se todas as músicas já tocaram, limpa a memória (ciclo completo)
                 if (candidates.length === 0) {
                     playedSessionIds.clear();
                     playedSessionIds.add(currentTrack.id);
@@ -1431,7 +1598,6 @@
 
                 let scored = candidates.map(t => {
                     let s = 0;
-                    // Compara rigorosamente contra a "SEMENTE" da rádio, mantendo a Vibe intacta
                     if (t.artist !== "Desconhecido" && t.artist === seedTrack.artist) s += 10;
                     if (t.genre && seedTrack.genre && t.genre !== "Desconhecido" && t.genre === seedTrack.genre) s += 8;
                     let cWords = seedTrack.title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
@@ -1454,16 +1620,12 @@
                 let nI = currentVisIndex + 1; 
                 
                 if(isShuffle) { 
-                    // Filtra as músicas da playlist atual que ainda NÃO tocaram
                     let unplayedVis = vis.filter(t => !playedSessionIds.has(t.id));
-                    
-                    // Se todas já tocaram, reseta a memória
                     if (unplayedVis.length === 0) {
                         playedSessionIds.clear();
                         if (playlist[currentTrackIndex]) playedSessionIds.add(playlist[currentTrackIndex].id);
                         unplayedVis = vis.filter(t => !playedSessionIds.has(t.id));
                     }
-                    
                     if (unplayedVis.length > 0) {
                         let picked = unplayedVis[Math.floor(Math.random() * unplayedVis.length)];
                         return Math.max(0, playlist.findIndex(t => t.id === picked.id));
@@ -1481,14 +1643,24 @@
             if(playlist.length===0) return; 
             
             if(userQueue.length > 0) {
-                userQueue.shift(); // Remove the played item from queue
+                userQueue.shift(); 
             }
             
-            // Usa o índice pré-calculado ou calcula caso falte
             let nextIdx = precalculatedNextIndex !== null ? precalculatedNextIndex : calculateNextTrackIndex();
             
-            fadeAndLoadTrack(nextIdx, isAuto); 
-            if(!isPlaying) togglePlay();
+            // INTEGRAÇÃO COM DJ EMERA
+            if (isAuto && DjEngine.isActive && DjEngine.nextTransitionAudioUrl) {
+                // Ao invés do tradicional fadeAndLoad, injetamos a fala da DJ
+                DjEngine.playTransition(() => {
+                    loadTrack(nextIdx); // Carrega a música que ficará baixinha enquanto a DJ fala
+                    if(!isPlaying) togglePlay();
+                });
+            } else {
+                fadeAndLoadTrack(nextIdx, isAuto); 
+                if(!isPlaying) togglePlay();
+                // Se a pessoa pulou a música manualmente, forçamos a DJ a refazer o roteiro!
+                if(DjEngine.isActive) DjEngine.prepareNextTransition();
+            }
         }
 
         function prevTrack() { 
@@ -1501,6 +1673,7 @@
             const originalIndex = Math.max(0, playlist.findIndex(t => t.id === vis[nI].id));
             fadeAndLoadTrack(originalIndex, false); 
             if(!isPlaying) togglePlay(); else audio.play(); 
+            if(DjEngine.isActive) DjEngine.prepareNextTransition();
         }
 
         function updateModeUI() {
@@ -1530,7 +1703,6 @@
             }
             DOM.upNextContainer.classList.remove('opacity-0', 'pointer-events-none');
 
-            // Calcula IMEDIATAMENTE qual será a próxima
             precalculatedNextIndex = calculateNextTrackIndex();
             const nextTrackObj = playlist[precalculatedNextIndex];
 
@@ -1641,12 +1813,10 @@
 
             const needed = endIndex - startIndex;
             
-            // Reciclagem: Removemos os filhos excedentes em vez de zerar o innerHTML
             while(DOM.virtualContent.children.length > needed) {
                 DOM.virtualContent.removeChild(DOM.virtualContent.lastChild);
             }
             
-            // Reciclagem: Injetamos apenas os que faltam na pool (só ocorrem nas bordas)
             while(DOM.virtualContent.children.length < needed) {
                 const el = document.createElement('div');
                 el.className = 'playlist-item-virtual playlist-item flex items-center gap-3 px-2 sm:px-4 py-2 rounded-md cursor-pointer transition hover:bg-white/10';
@@ -1672,7 +1842,6 @@
                 DOM.virtualContent.appendChild(el);
             }
 
-            // Atualização relâmpago: Em vez de destruir a tag, mudamos as suas propriedades!
             const uiNodes = DOM.virtualContent.children;
             for (let i = 0; i < needed; i++) {
                 const globalIdx = startIndex + i;
@@ -1760,8 +1929,9 @@
                 }
                 
                 if (currentMainView === 'home' && window.innerWidth >= 768) { switchMainView('player'); }
-                if (isRadio) radioSeedTrackId = playlist[originalIndex].id; // Atualiza a semente caso o usuário escolha manualmente a música
+                if (isRadio) radioSeedTrackId = playlist[originalIndex].id; 
                 fadeAndLoadTrack(originalIndex, false); if(!isPlaying) togglePlay(); 
+                if(DjEngine.isActive) DjEngine.prepareNextTransition(); // recalcula roteiro!
             });
         }
 
@@ -1976,7 +2146,7 @@
             if (editCoverBase64) {
                 if (t.cover && t.cover.startsWith('blob:')) URL.revokeObjectURL(t.cover);
                 t.cover = editCoverBase64;
-                delete t.coverBlob; // Remoção para sobreposição pela Base64 injetada manualmente
+                delete t.coverBlob; 
             }
             if(t.isLocal) saveTrackToDB(t); 
             if(trackToEditIndex === currentTrackIndex) { DOM.title.textContent = t.title; DOM.artist.textContent = t.artist; DOM.cover.src = t.cover || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=500&fit=crop'; DOM.bgBlurCover.src = DOM.cover.src; updateMiniPlayer(); } 
@@ -2022,7 +2192,6 @@
                             if(tag.tags.lyrics && tag.tags.lyrics.lyrics) result.lyrics = tag.tags.lyrics.lyrics;
                             else if(tag.tags.USLT && tag.tags.USLT.lyrics) result.lyrics = tag.tags.USLT.lyrics;
                             
-                            // Converte Base64 imensa direto num Blob pequenino!
                             if(tag.tags.picture) {
                                 try {
                                     const data = tag.tags.picture.data;
@@ -2073,7 +2242,6 @@
                 return;
             }
             
-            // Pausa extrema de contenção de energia em caso de ecrã apagado
             if(document.hidden) {
                 setTimeout(processNextMetadata, 2000);
                 return;
@@ -2090,7 +2258,6 @@
 
             setTimeout(() => {
                 metadataWorker.postMessage({ file: fileToRead, trackId: track.id });
-                // Limite cego (Timeout), destrava filas que engasgarem
                 track._metadataTimeout = setTimeout(() => {
                     track.needsMetadata = false;
                     saveTrackToDB(track);
@@ -2140,7 +2307,7 @@
         DOM.playerBg.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, {passive: true});
         DOM.playerBg.addEventListener('touchend', e => {
             let touchEndX = e.changedTouches[0].screenX; let touchEndY = e.changedTouches[0].screenY;
-            if (Math.abs(touchStartX - touchEndX) > Math.abs(touchStartY - touchEndY) && Math.abs(touchStartX - touchEndX) > 50) { if (touchStartX - touchEndX > 50) nextTrack(); if (touchEndX - touchStartX > 50) prevTrack(); } 
+            if (Math.abs(touchStartX - touchEndX) > Math.abs(touchStartY - touchEndY) && Math.abs(touchStartX - touchEndX) > 50) { if (touchStartX - touchEndX > 50) nextTrack(false); if (touchEndX - touchStartX > 50) prevTrack(); } 
             else if (Math.abs(touchStartX - touchEndX) < 10 && Math.abs(touchStartY - touchEndY) < 10) {
                 const currentTime = new Date().getTime(); const tapLength = currentTime - lastTouchBgTime;
                 if (tapLength < 300 && tapLength > 0) { e.preventDefault(); toggleFullscreen(); }
@@ -2158,7 +2325,7 @@
             
             switch(e.code) { 
                 case 'Space': e.preventDefault(); togglePlay(); break; 
-                case 'ArrowRight': e.preventDefault(); nextTrack(); break; 
+                case 'ArrowRight': e.preventDefault(); nextTrack(false); break; 
                 case 'ArrowLeft': e.preventDefault(); prevTrack(); break; 
                 case 'ArrowUp': e.preventDefault(); DOM.volBar.value=Math.min(1,parseFloat(DOM.volBar.value)+0.1); DOM.volBar.dispatchEvent(new Event('input')); break; 
                 case 'ArrowDown': e.preventDefault(); DOM.volBar.value=Math.max(0,parseFloat(DOM.volBar.value)-0.1); DOM.volBar.dispatchEvent(new Event('input')); break; 
@@ -2204,7 +2371,6 @@
             } catch(err) {}
         }
 
-        // Inicialização Final
         initDB().then(async () => {
             try { await loadTracksFromDB(); } catch(e) { console.error("Error loading local tracks:", e); }
             try { await loadTracksFromServer(); } catch(e) { console.error("Error loading server tracks:", e); }
