@@ -639,6 +639,7 @@
 
     <div id="lyrics-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] hidden opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-[#121212] border border-[#282828] text-white w-full max-w-lg h-[70vh] rounded-xl p-6 flex flex-col shadow-2xl relative overflow-hidden" id="lyrics-modal-panel">
+            <button id="translate-lyrics-btn" class="absolute top-4 right-16 text-spTextSub hover:text-white transition bg-black/20 hover:bg-black/40 rounded-full p-2 z-10" title="Traduzir Letra"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg></button>
             <button id="close-lyrics-btn" class="absolute top-4 right-4 text-spTextSub hover:text-white transition bg-black/20 hover:bg-black/40 rounded-full p-2 z-10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col relative" id="lyrics-scroll-container">
                 <div id="lyrics-text" class="m-auto whitespace-pre-wrap text-center text-lg sm:text-xl font-bold leading-relaxed px-4 py-[30vh] w-full transition-opacity duration-300"></div>
@@ -1921,6 +1922,12 @@
             const t = playlist[currentTrackIndex]; 
             if(!t) return; 
             
+            if (typeof isLyricsTranslated !== 'undefined' && isLyricsTranslated) {
+                const btn = document.getElementById('translate-lyrics-btn');
+                if (btn) { btn.classList.remove('text-accent'); btn.classList.add('text-spTextSub'); }
+                isLyricsTranslated = false;
+            }
+
             const lyricsTextEl = document.getElementById('lyrics-text');
             const loadingEl = document.getElementById('lyrics-loading');
             
@@ -1963,6 +1970,90 @@
             }
         });
         
+        let isLyricsTranslated = false;
+        let originalLyricsHTML = "";
+        let originalSyncedLyricsData = null;
+
+        document.getElementById('translate-lyrics-btn').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            const lyricsTextEl = document.getElementById('lyrics-text');
+            const loadingEl = document.getElementById('lyrics-loading');
+            const loadingText = loadingEl.querySelector('span');
+            
+            if (!window.currentSyncedLyrics && !lyricsTextEl.textContent.trim()) {
+                showToast("Não há letras para traduzir.");
+                return;
+            }
+
+            if (isLyricsTranslated) {
+                if (window.currentSyncedLyrics) {
+                    window.currentSyncedLyrics = JSON.parse(JSON.stringify(originalSyncedLyricsData));
+                    renderSyncedLyrics(window.currentSyncedLyrics);
+                } else {
+                    lyricsTextEl.innerHTML = originalLyricsHTML;
+                }
+                btn.classList.remove('text-accent');
+                btn.classList.add('text-spTextSub');
+                isLyricsTranslated = false;
+                showToast("Letra original restaurada.");
+                return;
+            }
+
+            try {
+                loadingEl.classList.remove('hidden');
+                loadingText.textContent = "A traduzir letra...";
+                
+                const translateText = async (text) => {
+                    const lines = text.split('\n');
+                    let translated = '';
+                    let currentChunk = '';
+                    for (let i = 0; i < lines.length; i++) {
+                        if (currentChunk.length + lines[i].length > 800) {
+                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=${encodeURIComponent(currentChunk)}`);
+                            const data = await res.json();
+                            translated += data[0].map(x => x[0]).join('') + (translated.endsWith('\n') ? '' : '\n');
+                            currentChunk = '';
+                        }
+                        currentChunk += lines[i] + '\n';
+                    }
+                    if (currentChunk.trim()) {
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q=${encodeURIComponent(currentChunk)}`);
+                        const data = await res.json();
+                        translated += data[0].map(x => x[0]).join('');
+                    }
+                    return translated;
+                };
+
+                if (window.currentSyncedLyrics) {
+                    originalSyncedLyricsData = JSON.parse(JSON.stringify(window.currentSyncedLyrics));
+                    const fullText = window.currentSyncedLyrics.map(l => l.text).join('\n');
+                    const translatedFullText = await translateText(fullText);
+                    const translatedLines = translatedFullText.split('\n');
+                    
+                    window.currentSyncedLyrics.forEach((l, idx) => {
+                        l.text = translatedLines[idx] || l.text;
+                    });
+                    renderSyncedLyrics(window.currentSyncedLyrics);
+                } else {
+                    originalLyricsHTML = lyricsTextEl.innerHTML;
+                    const plainText = lyricsTextEl.innerText;
+                    const translatedText = await translateText(plainText);
+                    lyricsTextEl.innerHTML = translatedText.replace(/\n/g, '<br>');
+                }
+
+                btn.classList.add('text-accent');
+                btn.classList.remove('text-spTextSub');
+                isLyricsTranslated = true;
+                showToast("Tradução concluída!");
+            } catch (err) {
+                console.error(err);
+                showToast("Erro ao traduzir. Tente novamente mais tarde.");
+            } finally {
+                loadingEl.classList.add('hidden');
+                loadingText.textContent = "A procurar letras..."; 
+            }
+        });
+
         document.getElementById('close-lyrics-btn').addEventListener('click', () => {
             tModal(document.getElementById('lyrics-modal'), false, 'lyrics');
             cancelAnimationFrame(lyricsSyncFrame);
